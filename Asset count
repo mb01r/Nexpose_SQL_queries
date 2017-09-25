@@ -1,0 +1,6 @@
+WITH
+    Assets AS(
+        SELECT DISTINCT ip_address
+            FROM dim_asset
+    )
+SELECT COUNT(ip_address) FROM Assets
