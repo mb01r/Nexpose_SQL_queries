@@ -1,0 +1,4 @@
+SELECT host_name AS "Host Name", ip_address AS "IP Address", title AS "vulnerability Title", CAST(cvss_score AS NUMERIC) AS "CVSS Score"
+            FROM fact_asset_vulnerability_finding
+                JOIN dim_vulnerability USING (vulnerability_id)
+                JOIN dim_asset USING (asset_id)
