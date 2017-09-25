@@ -1,0 +1,24 @@
+WITH
+     system AS(
+          SELECT asset_id, ip_address, host_name, sites
+               FROM dim_asset
+     ),
+     services AS(
+          SELECT asset_id, service_id, port, certainty, name
+               FROM dim_asset_service
+                    JOIN dim_service USING (service_id)
+     ),
+     software AS(
+          SELECT asset_id, software_id, vendor, name, version
+               FROM dim_asset_software
+               JOIN dim_software USING (software_id)
+     ),
+     credentailed_scan AS(
+          SELECT asset_id, certainty
+               FROM dim_asset_operating_system
+     )
+SELECT ip_address, host_name, sites, credentailed_scan.certainty AS "Valid Credentials", port, services.name AS "Service", vendor, software.name, version
+     FROM system
+          JOIN services USING (asset_id)
+          JOIN software USING (asset_id)
+          JOIN credentailed_scan USING (asset_id)
