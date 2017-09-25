@@ -1,0 +1,25 @@
+WITH
+    scan_timeframe AS(
+        SELECT scan_finished, asset_id
+            FROM fact_asset
+                WHERE scan_finished >= current_date - 90
+    ),
+    vulnerability_info AS(
+        SELECT title, severity, vulnerability_id, nexpose_id
+            FROM dim_vulnerability
+                WHERE nexpose_id LIKE '%obsolete%'
+    ),
+    asset_info AS(
+        SELECT asset_id, host_name, ip_address, sites
+            FROM dim_asset
+    ),
+    asset_vulnerability_severity_aging AS(
+        SELECT host_name, title, severity, asset_id, vulnerability_id, ip_address, scan_finished, sites
+            FROM fact_asset_vulnerability_age
+                JOIN scan_timeframe USING (asset_id)
+                JOIN vulnerability_info USING (vulnerability_id)
+                JOIN asset_info USING (asset_id)
+    )
+
+SELECT ip_address AS "IP Address", host_name AS "Host name", sites, title AS "Title", severity AS "Severity", scan_finished AS "last scan"
+    FROM asset_vulnerability_severity_aging
