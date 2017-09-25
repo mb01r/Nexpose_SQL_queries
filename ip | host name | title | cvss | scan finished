@@ -1,0 +1,20 @@
+WITH
+    scan_date AS (
+        SELECT finished, scan_id
+            FROM dim_scan
+                WHERE finished  >= '2016-09-15' AND finished <= '2016-09-16'
+    ),
+    asset_info AS (
+        SELECT asset_id, ip_address, host_name
+            FROM dim_asset
+    ),
+    vulners AS (
+        SELECT vulnerability_id, title, CAST(cvss_score AS NUMERIC)
+            FROM dim_vulnerability
+    )
+
+SELECT ip_address AS "IP Address", host_name AS "Host Name", title AS "Vulnerability", ROUND(cvss_score,1) AS "CVSS Score", finished AS "Scan Date"
+    FROM fact_asset_scan_vulnerability_instance
+        JOIN scan_date USING (scan_id)
+        JOIN asset_info USING (asset_id)
+        JOIN vulners USING (vulnerability_id)
