@@ -1,0 +1,24 @@
+
+with
+    open_ports AS(
+        SELECT asset_id, port AS open_port
+            FROM dim_asset_service
+    ),
+    service_information AS(
+        SELECT service_fingerprint_id, family, name, version
+            FROM dim_service_fingerprint
+    ),
+    asset_information AS(
+        SELECT ip_address, host_name, asset_id
+            FROM dim_asset
+    ),
+    cmn_internet_footprint AS(
+        SELECT asset_id, open_port, service_fingerprint_id, family, name, version, host_name, ip_address
+            FROM fact_asset_scan_service
+                JOIN open_ports USING (asset_id)
+                JOIN service_information USING (service_fingerprint_id)
+                JOIN asset_information USING (asset_id)
+    )
+    
+SELECT host_name AS "Host name", ip_address AS "IP", open_port, family, name, version
+    FROM cmn_internet_footprint
