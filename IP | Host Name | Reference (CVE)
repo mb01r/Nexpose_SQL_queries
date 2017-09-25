@@ -1,0 +1,17 @@
+WITH
+    asset_information AS(
+        SELECT asset_id, host_name, ip_address
+            FROM dim_asset
+    ),
+    glibc_information AS(
+        SELECT vulnerability_id, reference
+            FROM dim_vulnerability_reference WHERE reference LIKE 'CVE-2015-7547'
+    ),
+    final_query AS(
+        SELECT asset_id, host_name, ip_address, vulnerability_id, reference
+            FROM fact_asset_vulnerability_finding
+                JOIN asset_information USING (asset_id)
+                JOIN glibc_information USING (vulnerability_id)
+    )
+SELECT ip_address AS "IP Address", host_name AS "Host Name", reference AS "Reference"
+    FROM final_query
